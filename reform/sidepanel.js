@@ -1,43 +1,56 @@
-import { REQUIREMENT_GROUPS, PRESETS, DEFAULT_MIN_TEXT_SIZE, buildRequirements } from "./requirements.js";
+import { REQUIREMENTS, DEFAULT_MIN_TEXT_SIZE, buildRequirements } from "./requirements.js";
 import { getSettings, saveSettings, getPrefs, savePrefs, getJob, clearJob, onJobChange } from "./storage.js";
 import { isReformatted, restoreOriginalPage } from "./page-scripts.js";
 
 const $ = (id) => document.getElementById(id);
 
 const form = $("reform-form");
+
+// The side panel stays open while the user switches tabs, so it always works
+// on whichever tab is currently active in its window.
 let tab;
 
 init();
 
 async function init() {
 	renderRequirements();
-	renderPresets();
 
-	const [settings, prefs, [activeTab]] = await Promise.all([
-		getSettings(),
-		getPrefs(),
-		chrome.tabs.query({ active: true, currentWindow: true }),
-	]);
-	tab = activeTab;
-
+	const [settings, prefs] = await Promise.all([getSettings(), getPrefs()]);
 	applySettings(settings);
 	applyPrefs(prefs);
 	wireEvents();
 
-	if (!/^https?:/.test(tab?.url ?? "")) {
-		disableForm("Open a regular website (http or https) to reformat it. Browser pages like this one can't be changed.");
-		return;
-	}
-
-	const site = $("site");
-	site.replaceChildren("Reformatting ", Object.assign(document.createElement("strong"), { textContent: new URL(tab.url).hostname }));
-	site.hidden = false;
-
-	renderJob(await getJob(tab.id));
-	onJobChange(tab.id, (job) => {
+	chrome.tabs.onActivated.addListener(({ windowId }) => {
+		if (windowId === tab?.windowId) loadActiveTab();
+	});
+	chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+		if (tabId === tab?.id && (changeInfo.url || changeInfo.status === "complete")) loadActiveTab();
+	});
+	onJobChange((tabId, job) => {
+		if (tabId !== tab?.id) return;
 		renderJob(job);
 		refreshRestoreButton();
 	});
+
+	await loadActiveTab();
+}
+
+async function loadActiveTab() {
+	[tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+	const supported = /^https?:/.test(tab?.url ?? "");
+
+	form.hidden = !supported;
+	$("unsupported").hidden = supported;
+	$("site").hidden = !supported;
+	if (!supported) {
+		renderJob(null);
+		$("restore").hidden = true;
+		return;
+	}
+
+	const host = Object.assign(document.createElement("strong"), { textContent: new URL(tab.url).hostname });
+	$("site").replaceChildren("Reformatting ", host);
+	renderJob(await getJob(tab.id));
 	refreshRestoreButton();
 }
 
@@ -45,31 +58,23 @@ async function init() {
 
 function renderRequirements() {
 	const container = $("requirements");
-	for (const group of REQUIREMENT_GROUPS) {
-		const fieldset = document.createElement("fieldset");
-		const legend = document.createElement("legend");
-		legend.textContent = group.label;
-		fieldset.append(legend);
+	for (const item of REQUIREMENTS) {
+		const label = document.createElement("label");
+		label.className = "option";
+		label.innerHTML = `
+			<input type="checkbox" name="requirement">
+			<span>
+				<span class="option-title"></span>
+				<span class="option-hint"></span>
+			</span>`;
+		const checkbox = label.querySelector("input");
+		checkbox.value = item.id;
+		checkbox.id = `req-${item.id}`;
+		label.querySelector(".option-title").textContent = item.label;
+		label.querySelector(".option-hint").textContent = item.hint;
+		container.append(label);
 
-		for (const item of group.items) {
-			const label = document.createElement("label");
-			label.className = "option";
-			label.innerHTML = `
-				<input type="checkbox" name="requirement">
-				<span>
-					<span class="option-title"></span>
-					<span class="option-hint"></span>
-				</span>`;
-			const checkbox = label.querySelector("input");
-			checkbox.value = item.id;
-			checkbox.id = `req-${item.id}`;
-			label.querySelector(".option-title").textContent = item.label;
-			label.querySelector(".option-hint").textContent = item.hint;
-			fieldset.append(label);
-
-			if (item.hasValue) fieldset.append(renderMinTextSize());
-		}
-		container.append(fieldset);
+		if (item.hasValue) container.append(renderMinTextSize());
 	}
 }
 
@@ -78,23 +83,9 @@ function renderMinTextSize() {
 	row.className = "inline-setting";
 	row.id = "min-text-size-row";
 	row.innerHTML = `
-		<label for="min-text-size">Minimum size (px)</label>
+		<label for="min-text-size">Smallest size (px)</label>
 		<input id="min-text-size" type="number" min="12" max="40" step="1">`;
 	return row;
-}
-
-function renderPresets() {
-	const container = $("presets");
-	for (const preset of PRESETS) {
-		const button = document.createElement("button");
-		button.type = "button";
-		button.className = "chip";
-		button.textContent = preset.label;
-		button.dataset.preset = preset.id;
-		button.setAttribute("aria-pressed", "false");
-		button.addEventListener("click", () => applyPreset(preset));
-		container.append(button);
-	}
 }
 
 function renderJob(job) {
@@ -135,16 +126,9 @@ function renderJob(job) {
 }
 
 async function refreshRestoreButton() {
-	$("restore").hidden = !(await runInTab(isReformatted).catch(() => false));
-}
-
-function disableForm(message) {
-	form.hidden = true;
-	document.querySelector(".presets").hidden = true;
-	const note = document.createElement("p");
-	note.className = "disabled-note";
-	note.textContent = message;
-	document.querySelector("main").prepend(note);
+	const tabId = tab?.id;
+	const reformatted = await runInTab(isReformatted).catch(() => false);
+	if (tabId === tab?.id) $("restore").hidden = !reformatted;
 }
 
 // Form state
@@ -170,25 +154,10 @@ function applyPrefs(prefs) {
 	$("other").value = prefs.other;
 	$("min-text-size").value = prefs.minTextSize;
 	form.elements.output.value = prefs.output;
-	syncDerivedState();
+	syncMinSizeRow();
 }
 
-function applyPreset(preset) {
-	for (const input of form.querySelectorAll('input[name="requirement"]')) {
-		input.checked = preset.requirements.includes(input.value);
-	}
-	syncDerivedState();
-	savePrefs(readPrefs());
-}
-
-// Keeps preset chips and the min-size row in sync with the checkboxes.
-function syncDerivedState() {
-	const selected = selectedIds();
-	for (const chip of document.querySelectorAll(".chip")) {
-		const preset = PRESETS.find((p) => p.id === chip.dataset.preset);
-		const matches = preset.requirements.length === selected.length && preset.requirements.every((id) => selected.includes(id));
-		chip.setAttribute("aria-pressed", String(matches));
-	}
+function syncMinSizeRow() {
 	$("min-text-size-row").hidden = !$("req-min-text-size").checked;
 }
 
@@ -209,7 +178,7 @@ async function saveSettingsFromForm() {
 
 function wireEvents() {
 	form.addEventListener("change", () => {
-		syncDerivedState();
+		syncMinSizeRow();
 		hideFormError();
 		savePrefs(readPrefs());
 	});
@@ -227,7 +196,7 @@ async function onSubmit(event) {
 	event.preventDefault();
 	const prefs = readPrefs();
 	if (!prefs.selected.length && !prefs.other.trim()) {
-		showFormError("Pick at least one option, or describe what you need.");
+		showFormError("Pick at least one option, or tell the AI what you need.");
 		return;
 	}
 	await savePrefs(prefs);

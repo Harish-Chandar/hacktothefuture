@@ -1,12 +1,17 @@
-// Runs reformat jobs. The popup closes as soon as the user clicks the page, so the
-// slow work (reading the page, calling the server, applying the result) happens
-// here, and progress is written to session storage for the popup to display.
+// Runs reformat jobs. The slow work (reading the page, calling the server,
+// applying the result) happens here rather than in the side panel, and progress
+// is written to session storage so the panel can show it for whichever tab is active.
 
 import { capturePage, applyReformattedHtml } from "./page-scripts.js";
 import { mockReformat } from "./mock.js";
+import { buildPrompt, extractHtml } from "./prompt.js";
 import { getSettings, setJob, clearJob, saveView } from "./storage.js";
 
 const REQUEST_TIMEOUT_MS = 120_000;
+
+// Clicking the toolbar icon opens the side panel, which squeezes the page
+// instead of covering it like a popup would.
+chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(console.error);
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 	if (message?.type !== "reformat") return;
@@ -60,26 +65,32 @@ async function runInTab(tabId, func, args = []) {
 	return injection.result;
 }
 
-// Contract with the server. See reform/README.md.
-async function requestReformat(serverUrl, body) {
-	const endpoint = `${serverUrl.replace(/\/+$/, "")}/reformat`;
+// Uses the server's POST /ask-gemini endpoint: { prompt } -> { text }.
+async function requestReformat(serverUrl, page) {
+	const endpoint = `${serverUrl.replace(/\/+$/, "")}/ask-gemini`;
 	let response;
 	try {
 		response = await fetch(endpoint, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(body),
+			body: JSON.stringify({ prompt: buildPrompt(page) }),
 			signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
 		});
 	} catch (error) {
-		if (error.name === "TimeoutError") throw new Error("The server took too long to respond. Try again, or pick fewer options.");
+		if (error.name === "TimeoutError") throw new Error("The server took too long to respond. Please try again.");
 		throw new Error(`Can't reach the server at ${serverUrl}. Is it running? You can also turn on demo mode in Settings.`);
 	}
 
+	if (response.status === 413) throw new Error("This page is too big for the server to accept.");
 	const data = await response.json().catch(() => null);
 	if (!response.ok) throw new Error(data?.error || `The server returned an error (${response.status}).`);
-	if (typeof data?.html !== "string" || !data.html.trim()) throw new Error("The server's response didn't include any HTML.");
-	return { html: data.html, changes: Array.isArray(data.changes) ? data.changes : [] };
+
+	const html = typeof data?.text === "string" ? extractHtml(data.text) : null;
+	if (!html) throw new Error("The AI didn't send back a web page. Please try again.");
+
+	const changes = page.requirements.map((requirement) => requirement.label);
+	if (page.other) changes.push(`Your request: "${page.other}"`);
+	return { html, changes };
 }
 
 function friendlyError(error) {

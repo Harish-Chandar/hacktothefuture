@@ -1,13 +1,12 @@
-// Shared chrome.storage helpers for the popup, background worker, and viewer.
+// Shared chrome.storage helpers for the side panel, background worker, and viewer.
 //   local:   settings, the user's last selections (prefs), and new-tab views
-//   session: per-tab job status, so the popup can show progress after reopening
+//   session: per-tab job status, so the panel can show progress for the active tab
 
 import { DEFAULT_MIN_TEXT_SIZE } from "./requirements.js";
 
 export const DEFAULT_SETTINGS = {
 	serverUrl: "http://127.0.0.1:5000",
-	// The server has no /reformat endpoint yet, so start in demo mode.
-	mock: true,
+	mock: false,
 };
 
 export const DEFAULT_PREFS = {
@@ -50,10 +49,13 @@ export async function clearJob(tabId) {
 	await chrome.storage.session.remove(jobKey(tabId));
 }
 
-export function onJobChange(tabId, callback) {
+// Calls back with (tabId, job) whenever any tab's job changes.
+export function onJobChange(callback) {
 	chrome.storage.onChanged.addListener((changes, area) => {
-		const change = changes[jobKey(tabId)];
-		if (area === "session" && change) callback(change.newValue);
+		if (area !== "session") return;
+		for (const [key, change] of Object.entries(changes)) {
+			if (key.startsWith("job:")) callback(Number(key.slice("job:".length)), change.newValue);
+		}
 	});
 }
 

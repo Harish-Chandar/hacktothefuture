@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reform</title>
+    <link rel="stylesheet" href="sidepanel.css">
+    <script type="module" src="sidepanel.js"></script>
+</head>
+
+<body>
+    <header class="top">
+        <img src="icon.png" alt="" width="24" height="24">
+        <h1>Reform</h1>
+        <span id="demo-badge" class="badge" hidden>Demo mode</span>
+    </header>
+
+    <p id="site" class="site" hidden></p>
+    <p id="unsupported" class="note" hidden>Open a regular website (http or https) to reformat it. Browser pages like this one can't be changed.</p>
+
+    <form id="reform-form" novalidate>
+        <fieldset>
+            <legend>What should change?</legend>
+            <div id="requirements"></div>
+        </fieldset>
+
+        <div class="field">
+            <label for="other">Tell the AI what else you need</label>
+            <textarea id="other" rows="3" placeholder="e.g. Make the menu buttons bigger and hide the sidebar"></textarea>
+        </div>
+
+        <fieldset class="output">
+            <legend>Show the result</legend>
+            <label class="radio"><input type="radio" name="output" value="in-place"> This tab</label>
+            <label class="radio"><input type="radio" name="output" value="new-tab"> New tab</label>
+        </fieldset>
+
+        <p id="form-error" class="form-error" role="alert" hidden></p>
+        <button type="submit" id="submit" class="primary">Reformat page</button>
+    </form>
+
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+    <button type="button" id="restore" class="secondary" hidden>Restore original page</button>
+
+    <details class="settings">
+        <summary>Settings</summary>
+        <div class="field">
+            <label for="server-url">Server URL</label>
+            <input id="server-url" type="url" spellcheck="false">
+        </div>
+        <label class="check">
+            <input id="mock" type="checkbox">
+            <span>Demo mode <span class="hint">(no server; built-in styles instead of AI)</span></span>
+        </label>
+    </details>
+</body>
+
+</html>

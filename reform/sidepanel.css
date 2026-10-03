@@ -1,5 +1,5 @@
-/* The popup is an accessibility tool, so it holds itself to the same bar:
-   AA contrast, visible focus, 44px targets, and no meaning carried by color alone. */
+/* The panel is an accessibility tool, so it holds itself to the same bar:
+   AA contrast, visible focus, roomy click targets, and no meaning carried by color alone. */
 
 :root {
 	--bg: #ffffff;
@@ -38,12 +38,11 @@
 }
 
 body {
-	width: 380px;
 	margin: 0;
-	padding: 16px;
+	padding: 12px 14px 16px;
 	background: var(--bg);
 	color: var(--text);
-	font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 :focus-visible {
@@ -55,7 +54,7 @@ body {
 	display: none !important;
 }
 
-h1, h2, p {
+p {
 	margin: 0;
 }
 
@@ -64,29 +63,21 @@ h1, h2, p {
 .top {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 8px;
 }
 
 .top img {
-	border-radius: 8px;
-}
-
-.brand {
-	flex: 1;
+	border-radius: 6px;
 }
 
 h1 {
-	font-size: 20px;
-	line-height: 1.1;
-}
-
-.tagline {
-	color: var(--muted);
-	font-size: 13px;
+	flex: 1;
+	margin: 0;
+	font-size: 17px;
 }
 
 .badge {
-	padding: 3px 8px;
+	padding: 2px 8px;
 	border: 1px solid var(--accent);
 	border-radius: 999px;
 	color: var(--accent);
@@ -95,13 +86,17 @@ h1 {
 	white-space: nowrap;
 }
 
-.site {
-	margin-top: 12px;
+.site,
+.note {
+	margin-top: 10px;
 	padding: 6px 10px;
 	border-radius: 8px;
 	background: var(--surface);
 	color: var(--muted);
 	font-size: 13px;
+}
+
+.site {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -111,80 +106,39 @@ h1 {
 	color: var(--text);
 }
 
-main {
-	margin-top: 14px;
+/* Form */
+
+fieldset {
+	margin: 14px 0 0;
+	padding: 0;
+	border: 0;
 }
 
-/* Presets */
-
-h2,
 legend,
-.field-label {
+.field > label {
 	display: block;
 	margin-bottom: 6px;
 	padding: 0;
-	color: var(--muted);
-	font-size: 12px;
 	font-weight: 700;
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
-}
-
-.chips {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 6px;
-}
-
-.chip {
-	min-height: 36px;
-	padding: 6px 12px;
-	border: 1px solid var(--border);
-	border-radius: 999px;
-	background: var(--bg);
-	color: var(--text);
-	font: inherit;
-	font-size: 14px;
-	cursor: pointer;
-}
-
-.chip:hover {
-	border-color: var(--accent);
-}
-
-.chip[aria-pressed="true"] {
-	border-color: var(--accent);
-	background: var(--accent-soft);
-	color: var(--text);
-	font-weight: 600;
-}
-
-.chip[aria-pressed="true"]::before {
-	content: "✓ ";
-}
-
-/* Requirement checklist */
-
-fieldset {
-	margin: 16px 0 0;
-	padding: 0;
-	border: 0;
 }
 
 .option {
 	display: flex;
 	align-items: flex-start;
-	gap: 10px;
-	min-height: 44px;
-	padding: 8px 10px;
+	gap: 8px;
+	padding: 7px 9px;
 	border: 1px solid var(--border);
-	border-radius: 10px;
+	border-radius: 8px;
 	cursor: pointer;
 }
 
 .option + .option,
-.option + .inline-setting + .option {
-	margin-top: 6px;
+.option + .inline-setting {
+	margin-top: 5px;
+}
+
+.inline-setting + .option {
+	margin-top: 5px;
 }
 
 .option:hover {
@@ -199,8 +153,8 @@ fieldset {
 .option input,
 .check input,
 .radio input {
-	width: 18px;
-	height: 18px;
+	width: 16px;
+	height: 16px;
 	margin: 2px 0 0;
 	flex-shrink: 0;
 	accent-color: var(--accent);
@@ -215,7 +169,7 @@ fieldset {
 .hint {
 	display: block;
 	color: var(--muted);
-	font-size: 13px;
+	font-size: 12.5px;
 }
 
 .hint {
@@ -226,30 +180,30 @@ fieldset {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	margin: 6px 0 0 38px;
-	font-size: 14px;
+	padding-left: 33px;
+	font-size: 13px;
 }
 
 .inline-setting label {
 	white-space: nowrap;
 }
 
-.inline-setting input {
-	width: 72px;
+.inline-setting input[type="number"] {
+	width: 64px;
+	min-height: 30px;
+	padding: 4px 8px;
 }
 
-/* Inputs */
-
 .field {
-	margin-top: 16px;
+	margin-top: 14px;
 }
 
 input[type="number"],
 input[type="url"],
 textarea {
 	width: 100%;
-	min-height: 40px;
-	padding: 8px 10px;
+	min-height: 34px;
+	padding: 7px 9px;
 	border: 1px solid var(--border);
 	border-radius: 8px;
 	background: var(--bg);
@@ -268,7 +222,7 @@ textarea::placeholder {
 .output {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 4px 16px;
+	gap: 2px 16px;
 }
 
 .output legend {
@@ -279,8 +233,8 @@ textarea::placeholder {
 .check {
 	display: flex;
 	align-items: flex-start;
-	gap: 8px;
-	min-height: 32px;
+	gap: 6px;
+	min-height: 26px;
 	cursor: pointer;
 }
 
@@ -289,9 +243,9 @@ textarea::placeholder {
 button.primary,
 button.secondary {
 	width: 100%;
-	min-height: 44px;
-	margin-top: 16px;
-	border-radius: 10px;
+	min-height: 40px;
+	margin-top: 14px;
+	border-radius: 8px;
 	font: inherit;
 	font-weight: 700;
 	cursor: pointer;
@@ -319,7 +273,7 @@ button.secondary {
 }
 
 .form-error {
-	margin-top: 12px;
+	margin-top: 10px;
 	color: var(--danger);
 	font-weight: 600;
 }
@@ -335,10 +289,10 @@ button.secondary {
 }
 
 .status {
-	margin-top: 14px;
-	padding: 10px 12px;
+	margin-top: 12px;
+	padding: 9px 11px;
 	border: 1px solid var(--border);
-	border-radius: 10px;
+	border-radius: 8px;
 	background: var(--surface);
 }
 
@@ -363,14 +317,14 @@ button.secondary {
 }
 
 .status ul {
-	margin: 8px 0 0;
-	padding-left: 20px;
-	font-size: 14px;
+	margin: 6px 0 0;
+	padding-left: 18px;
+	font-size: 13px;
 }
 
 .spinner {
-	width: 16px;
-	height: 16px;
+	width: 14px;
+	height: 14px;
 	flex-shrink: 0;
 	border: 2px solid var(--border);
 	border-top-color: var(--accent);
@@ -393,29 +347,26 @@ button.secondary {
 /* Settings */
 
 .settings {
-	margin-top: 16px;
-	padding-top: 10px;
+	margin-top: 14px;
+	padding-top: 8px;
 	border-top: 1px solid var(--border);
 }
 
 .settings summary {
-	min-height: 32px;
+	min-height: 26px;
 	color: var(--muted);
 	font-weight: 600;
 	cursor: pointer;
 }
 
 .settings .field {
-	margin-top: 8px;
+	margin-top: 6px;
+}
+
+.settings .field > label {
+	font-weight: 600;
 }
 
 .settings .check {
-	margin-top: 10px;
-}
-
-.disabled-note {
-	margin-top: 14px;
-	padding: 10px 12px;
-	border-radius: 10px;
-	background: var(--surface);
+	margin-top: 8px;
 }
