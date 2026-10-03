@@ -1,6 +1,13 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import multer from "multer";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const app = express();
 app.use(cors({
@@ -13,15 +20,6 @@ app.use(cors({
 		callback(new Error("Origin not allowed by CORS"));
 	}
 }));
-
-import multer from "multer";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
-import os from "node:os";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 app.use(
@@ -108,13 +106,6 @@ app.post("/ask-gemini", async (request, response) => {
 	});
 });
 
-app.use((error, _request, response, _next) => {
-	console.error(error);
-	response.json({
-		ok: false,
-		error: error.message ?? "Server error."
-	});
-});
 const upload = multer({
 	storage: multer.memoryStorage(),
 	limits: { fileSize: 10 * 1024 * 1024 }
@@ -214,7 +205,6 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
 		}
 	}
 });
-
 
 app.listen(port, host, () => {
 	console.log(`API listening at http://${host}:${port}`);
