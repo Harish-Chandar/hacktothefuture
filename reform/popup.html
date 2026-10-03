@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Reform</title>
+    <link rel="stylesheet" href="popup.css">
+    <script type="module" src="popup.js"></script>
+</head>
+
+<body>
+    <header class="top">
+        <img src="icon.png" alt="" width="32" height="32">
+        <div class="brand">
+            <h1>Reform</h1>
+            <p class="tagline">Make this page easier to use</p>
+        </div>
+        <span id="demo-badge" class="badge" hidden>Demo mode</span>
+    </header>
+
+    <p id="site" class="site" hidden></p>
+
+    <main>
+        <section class="presets" aria-labelledby="presets-heading">
+            <h2 id="presets-heading">Quick presets</h2>
+            <div id="presets" class="chips"></div>
+        </section>
+
+        <form id="reform-form" novalidate>
+            <div id="requirements"></div>
+
+            <div class="field">
+                <label for="other" class="field-label">Anything else?</label>
+                <textarea id="other" rows="2" placeholder="e.g. Make the search bar easier to find"></textarea>
+            </div>
+
+            <fieldset class="output">
+                <legend>Show the result</legend>
+                <label class="radio"><input type="radio" name="output" value="in-place"> In this tab</label>
+                <label class="radio"><input type="radio" name="output" value="new-tab"> In a new tab</label>
+            </fieldset>
+
+            <p id="form-error" class="form-error" role="alert" hidden></p>
+            <button type="submit" id="submit" class="primary">Reformat page</button>
+        </form>
+
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+        <button type="button" id="restore" class="secondary" hidden>Restore original page</button>
+    </main>
+
+    <details class="settings">
+        <summary>Settings</summary>
+        <div class="field">
+            <label for="server-url" class="field-label">Server URL</label>
+            <input id="server-url" type="url" spellcheck="false">
+        </div>
+        <label class="check">
+            <input id="mock" type="checkbox">
+            <span>Demo mode <span class="hint">(no server needed, uses built-in styles instead of AI)</span></span>
+        </label>
+    </details>
+</body>
+
+</html>
