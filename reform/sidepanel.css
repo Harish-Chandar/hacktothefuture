@@ -76,15 +76,6 @@ h1 {
 	font-size: 17px;
 }
 
-.badge {
-	padding: 2px 8px;
-	border: 1px solid var(--accent);
-	border-radius: 999px;
-	color: var(--accent);
-	font-size: 12px;
-	font-weight: 600;
-	white-space: nowrap;
-}
 
 .site,
 .note {
@@ -151,7 +142,6 @@ legend,
 }
 
 .option input,
-.check input,
 .radio input {
 	width: 16px;
 	height: 16px;
@@ -165,15 +155,10 @@ legend,
 	font-weight: 600;
 }
 
-.option-hint,
-.hint {
+.option-hint {
 	display: block;
 	color: var(--muted);
 	font-size: 12.5px;
-}
-
-.hint {
-	display: inline;
 }
 
 .inline-setting {
@@ -229,8 +214,7 @@ textarea::placeholder {
 	width: 100%;
 }
 
-.radio,
-.check {
+.radio {
 	display: flex;
 	align-items: flex-start;
 	gap: 6px;
@@ -342,31 +326,4 @@ button.secondary {
 	.spinner {
 		animation-duration: 2.4s;
 	}
-}
-
-/* Settings */
-
-.settings {
-	margin-top: 14px;
-	padding-top: 8px;
-	border-top: 1px solid var(--border);
-}
-
-.settings summary {
-	min-height: 26px;
-	color: var(--muted);
-	font-weight: 600;
-	cursor: pointer;
-}
-
-.settings .field {
-	margin-top: 6px;
-}
-
-.settings .field > label {
-	font-weight: 600;
-}
-
-.settings .check {
-	margin-top: 8px;
 }

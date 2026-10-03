@@ -1,5 +1,5 @@
 import { REQUIREMENTS, DEFAULT_MIN_TEXT_SIZE, buildRequirements } from "./requirements.js";
-import { getSettings, saveSettings, getPrefs, savePrefs, getJob, clearJob, onJobChange } from "./storage.js";
+import { getPrefs, savePrefs, getJob, clearJob, onJobChange } from "./storage.js";
 import { isReformatted, restoreOriginalPage } from "./page-scripts.js";
 
 const $ = (id) => document.getElementById(id);
@@ -15,9 +15,7 @@ init();
 async function init() {
 	renderRequirements();
 
-	const [settings, prefs] = await Promise.all([getSettings(), getPrefs()]);
-	applySettings(settings);
-	applyPrefs(prefs);
+	applyPrefs(await getPrefs());
 	wireEvents();
 
 	chrome.tabs.onActivated.addListener(({ windowId }) => {
@@ -161,19 +159,6 @@ function syncMinSizeRow() {
 	$("min-text-size-row").hidden = !$("req-min-text-size").checked;
 }
 
-function applySettings(settings) {
-	$("server-url").value = settings.serverUrl;
-	$("mock").checked = settings.mock;
-	$("demo-badge").hidden = !settings.mock;
-}
-
-async function saveSettingsFromForm() {
-	const serverUrl = $("server-url").value.trim();
-	const settings = { serverUrl: serverUrl || (await getSettings()).serverUrl, mock: $("mock").checked };
-	await saveSettings(settings);
-	$("demo-badge").hidden = !settings.mock;
-}
-
 // Events
 
 function wireEvents() {
@@ -188,8 +173,6 @@ function wireEvents() {
 	});
 	form.addEventListener("submit", onSubmit);
 	$("restore").addEventListener("click", onRestore);
-	$("server-url").addEventListener("change", saveSettingsFromForm);
-	$("mock").addEventListener("change", saveSettingsFromForm);
 }
 
 async function onSubmit(event) {

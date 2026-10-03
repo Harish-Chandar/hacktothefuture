@@ -9,24 +9,23 @@ Clicking the Reform icon opens a side panel next to the page (the page shrinks t
 3. Pin Reform from the puzzle-piece menu, open any website, and click the icon.
 4. After changing code, click the reload icon on the Reform card, then close and reopen the side panel.
 
-Start the server first (`cd server && npm install && npm start`, with `GEMINI` set in `server/.env`). To demo without the server, turn on **Demo mode** under **Settings** in the panel. It applies each option with built-in CSS and skips the free-text request.
+Start the server first (`cd server && npm install && npm start`, with `GEMINI` set in `server/.env`). The extension always calls `http://127.0.0.1:5000`. Test it as a real extension in Chrome (steps above), not with VS Code Live Server, because the panel needs Chrome's extension APIs.
 
 ## Files
 
 | File | What it does |
 |---|---|
-| `sidepanel.html` / `.css` / `.js` | The side panel UI: options, text box, output choice, status, settings |
+| `sidepanel.html` / `.css` / `.js` | The side panel UI: options, text box, output choice, status |
 | `requirements.js` | The three options and the instruction sent to Gemini for each |
 | `prompt.js` | Builds the Gemini prompt and pulls the HTML out of Gemini's reply |
-| `background.js` | Runs each job: reads the page, calls the server (or demo mode), applies the result |
+| `background.js` | Runs each job: reads the page, calls the server, and applies the result |
 | `page-scripts.js` | Functions injected into the website: capture HTML, apply new HTML, restore original |
 | `viewer.html` / `.css` / `.js` | The "new tab" view, which renders the result in a script-free sandbox |
-| `mock.js` | Demo mode: CSS-only stand-in for the server |
-| `storage.js` | Settings, saved selections, and job status in `chrome.storage` |
+| `storage.js` | Saved selections and job status in `chrome.storage` |
 
 ## How it talks to the server
 
-The extension uses the server's existing endpoint, `POST {serverUrl}/ask-gemini` (default `http://127.0.0.1:5000/ask-gemini`):
+The extension uses the server's existing endpoint, `POST http://127.0.0.1:5000/ask-gemini`:
 
 - Request: `{ "prompt": "<instructions + user's needs + page HTML>" }`. The full prompt is built in `prompt.js`.
 - Response: `{ "ok": true, "text": "<Gemini's reply>" }`. The extension pulls the HTML document out of `text`, even if Gemini wrapped it in a code fence.

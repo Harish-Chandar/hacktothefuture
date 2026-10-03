@@ -1,13 +1,8 @@
 // Shared chrome.storage helpers for the side panel, background worker, and viewer.
-//   local:   settings, the user's last selections (prefs), and new-tab views
+//   local:   the user's last selections (prefs) and new-tab views
 //   session: per-tab job status, so the panel can show progress for the active tab
 
 import { DEFAULT_MIN_TEXT_SIZE } from "./requirements.js";
-
-export const DEFAULT_SETTINGS = {
-	serverUrl: "http://127.0.0.1:5000",
-	mock: false,
-};
 
 export const DEFAULT_PREFS = {
 	selected: [],
@@ -15,15 +10,6 @@ export const DEFAULT_PREFS = {
 	output: "in-place",
 	minTextSize: DEFAULT_MIN_TEXT_SIZE,
 };
-
-export async function getSettings() {
-	const { settings } = await chrome.storage.local.get("settings");
-	return { ...DEFAULT_SETTINGS, ...settings };
-}
-
-export async function saveSettings(settings) {
-	await chrome.storage.local.set({ settings });
-}
 
 export async function getPrefs() {
 	const { prefs } = await chrome.storage.local.get("prefs");

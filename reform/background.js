@@ -3,10 +3,10 @@
 // is written to session storage so the panel can show it for whichever tab is active.
 
 import { capturePage, applyReformattedHtml } from "./page-scripts.js";
-import { mockReformat } from "./mock.js";
 import { buildPrompt, extractHtml } from "./prompt.js";
-import { getSettings, setJob, clearJob, saveView } from "./storage.js";
+import { setJob, clearJob, saveView } from "./storage.js";
 
+const SERVER_URL = "http://127.0.0.1:5000";
 const REQUEST_TIMEOUT_MS = 120_000;
 
 // Clicking the toolbar icon opens the side panel, which squeezes the page
@@ -32,15 +32,8 @@ async function runJob({ tabId, requirements, other, output }) {
 	try {
 		await update({ state: "working", message: "Reading the page…" });
 		const page = await runInTab(tabId, capturePage);
-		const settings = await getSettings();
-
-		await update({
-			state: "working",
-			message: settings.mock ? "Applying demo changes…" : "Asking the AI to reformat the page…",
-		});
-		const result = settings.mock
-			? await mockReformat(page.html, requirements, other)
-			: await requestReformat(settings.serverUrl, { ...page, requirements, other });
+		await update({ state: "working", message: "Asking the AI to reformat the page…" });
+		const result = await requestReformat({ ...page, requirements, other });
 
 		if (output === "new-tab") {
 			const viewId = await saveView({ url: page.url, title: page.title, html: result.html, changes: result.changes });
@@ -66,8 +59,8 @@ async function runInTab(tabId, func, args = []) {
 }
 
 // Uses the server's POST /ask-gemini endpoint: { prompt } -> { text }.
-async function requestReformat(serverUrl, page) {
-	const endpoint = `${serverUrl.replace(/\/+$/, "")}/ask-gemini`;
+async function requestReformat(page) {
+	const endpoint = `${SERVER_URL}/ask-gemini`;
 	let response;
 	try {
 		response = await fetch(endpoint, {
@@ -78,7 +71,7 @@ async function requestReformat(serverUrl, page) {
 		});
 	} catch (error) {
 		if (error.name === "TimeoutError") throw new Error("The server took too long to respond. Please try again.");
-		throw new Error(`Can't reach the server at ${serverUrl}. Is it running? You can also turn on demo mode in Settings.`);
+		throw new Error(`Can't reach the server at ${SERVER_URL}. Is it running? (cd server && npm start)`);
 	}
 
 	if (response.status === 413) throw new Error("This page is too big for the server to accept.");
