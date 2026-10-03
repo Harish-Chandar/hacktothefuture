@@ -125,6 +125,10 @@ function renderJob(job) {
 	line.append(job.message);
 	status.append(line);
 
+	if (job.state === "working") {
+		status.append(createSpringLoader());
+	}
+
 	if (job.state === "done" && job.changes?.length) {
 		const list = document.createElement("ul");
 		for (const change of job.changes) {
@@ -134,6 +138,18 @@ function renderJob(job) {
 		}
 		status.append(list);
 	}
+}
+
+function createSpringLoader() {
+	const loader = document.createElement("div");
+	loader.className = "spring-loader";
+	loader.setAttribute("aria-hidden", "true");
+	for (let index = 0; index < 3; index += 1) {
+		const bunny = document.createElement("span");
+		bunny.className = "bunny";
+		loader.append(bunny);
+	}
+	return loader;
 }
 
 async function refreshRestoreButton() {
@@ -366,14 +382,18 @@ function setPostPending(action) {
 	summarize.replaceChildren();
 	if (action === "reformat") {
 		const spinner = document.createElement("span");
+		const label = document.createElement("span");
 		spinner.className = "spinner";
 		spinner.setAttribute("aria-hidden", "true");
-		submit.append(spinner, " Working…");
+		label.textContent = "Reformatting...";
+		submit.append(spinner, label);
 	} else if (action === "summarize") {
 		const spinner = document.createElement("span");
+		const label = document.createElement("span");
 		spinner.className = "spinner";
 		spinner.setAttribute("aria-hidden", "true");
-		summarize.append(spinner, " Summarizing…");
+		label.textContent = "Summarizing...";
+		summarize.append(spinner, label);
 	} else {
 		submit.textContent = "Reformat page";
 		renderSummaryButton(summary);
