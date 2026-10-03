@@ -1,6 +1,6 @@
 # Reform (Chrome extension)
 
-Clicking the Reform icon opens a side panel next to the page (the page shrinks to make room instead of being covered). The user picks what should change (color contrast, minimum text size, traditional layout), can type (or say, with the **Speak** button) anything else for the AI, and clicks **Reformat page**. The rewritten page appears either in the same tab (with a **Restore original page** button) or in a new tab.
+Clicking the Reform icon opens a side panel next to the page (the page shrinks to make room instead of being covered). The user picks what should change (layout, minimum text size, color vision support), can type (or say, with the **Speak** button) anything else for the AI, and clicks **Reformat page**. The rewritten page appears either in the same tab (with a **Restore original page** button) or in a new tab.
 
 ## Load it in Chrome
 
@@ -16,7 +16,7 @@ Start the server first (`cd server && npm install && npm start`). It needs `GEMI
 | File | What it does |
 |---|---|
 | `sidepanel.html` / `.css` / `.js` | The side panel UI: options, text box, output choice, status |
-| `requirements.js` | The three options and the instruction sent to Gemini for each |
+| `requirements.js` | The checkbox options and the instructions sent to Gemini for each |
 | `prompt.js` | Builds the Gemini prompt and pulls the HTML out of Gemini's reply |
 | `background.js` | Runs each job: reads the page, calls the server, and applies the result |
 | `page-scripts.js` | Functions injected into the website: capture HTML, apply new HTML, restore original |

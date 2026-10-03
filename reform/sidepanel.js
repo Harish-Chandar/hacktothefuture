@@ -8,6 +8,7 @@ const $ = (id) => document.getElementById(id);
 
 const form = $("reform-form");
 const COLOR_VISION_VALUES = ["none", "protan", "deutan", "tritan", "achromatopsia"];
+const LAYOUT_VALUES = ["original", "focused", "kid-friendly", "pure-text"];
 
 // The side panel stays open while the user switches tabs, so it always works
 // on whichever tab is currently active in its window.
@@ -154,6 +155,7 @@ function readPrefs() {
 		other: $("other").value,
 		output: form.elements.output.value || "in-place",
 		minTextSize: Number.isFinite(size) && size >= 12 && size <= 40 ? size : DEFAULT_MIN_TEXT_SIZE,
+		layout: LAYOUT_VALUES.includes($("layout").value) ? $("layout").value : "original",
 		colorVision: $("color-vision").value || "none",
 	};
 }
@@ -164,6 +166,7 @@ function applyPrefs(prefs) {
 	}
 	$("other").value = prefs.other;
 	$("min-text-size").value = prefs.minTextSize;
+	$("layout").value = LAYOUT_VALUES.includes(prefs.layout) ? prefs.layout : "original";
 	$("color-vision").value = COLOR_VISION_VALUES.includes(prefs.colorVision) ? prefs.colorVision : "none";
 	form.elements.output.value = prefs.output;
 	syncMinSizeRow();
@@ -247,7 +250,7 @@ async function onSubmit(event) {
 	event.preventDefault();
 	hideApiError();
 	const prefs = readPrefs();
-	if (!prefs.selected.length && !prefs.other.trim() && prefs.colorVision === "none") {
+	if (!prefs.selected.length && !prefs.other.trim() && prefs.colorVision === "none" && prefs.layout === "original") {
 		showFormError("Pick at least one option, or tell the AI what you need.");
 		return;
 	}
@@ -256,6 +259,7 @@ async function onSubmit(event) {
 		type: "reformat",
 		tabId: tab.id,
 		requirements: buildRequirements(prefs.selected, { minTextSize: prefs.minTextSize }),
+		layout: prefs.layout,
 		colorVision: prefs.colorVision,
 		other: prefs.other.trim(),
 		output: prefs.output,

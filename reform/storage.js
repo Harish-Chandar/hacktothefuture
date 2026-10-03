@@ -9,6 +9,7 @@ export const DEFAULT_PREFS = {
 	other: "",
 	output: "in-place",
 	minTextSize: DEFAULT_MIN_TEXT_SIZE,
+	layout: "original",
 	colorVision: "none",
 };
 

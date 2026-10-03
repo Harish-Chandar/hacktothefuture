@@ -6,11 +6,41 @@ import path from "node:path";
 import {
 	buildGeminiPrompt,
 	colorVisionPromptSection,
-	normalizeColorVision
+	normalizeColorVision,
+	normalizeLayout,
+	layoutPromptSection
 } from "../src/server.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const sidepanelPath = path.join(__dirname, "../../reform/sidepanel.html");
+
+test("side panel layout select exposes all supported layouts", async () => {
+	const html = await readFile(sidepanelPath, "utf8");
+	const select = html.match(/<select id="layout">([\s\S]*?)<\/select>/);
+
+	assert.ok(select, "layout select should exist");
+	assert.deepEqual([...select[1].matchAll(/<option value="([^"]+)">([^<]+)<\/option>/g)].map((match) => ({
+		value: match[1],
+		label: match[2]
+	})), [
+		{ value: "original", label: "Original Layout" },
+		{ value: "focused", label: "Focused Layout" },
+		{ value: "kid-friendly", label: "Kid-Friendly Layout" },
+		{ value: "pure-text", label: "Pure Text" }
+	]);
+});
+
+test("layout settings append the matching prompt instructions", () => {
+	assert.equal(normalizeLayout(undefined), "original");
+	assert.match(layoutPromptSection("original"), /Preserve the page's existing layout and structure exactly/);
+	assert.match(buildGeminiPrompt("USER PROMPT", "none", "focused"), /traditional, easy-to-read single-column layout/);
+	assert.match(buildGeminiPrompt("USER PROMPT", "none", "kid-friendly"), /fun and interactive for children/);
+	assert.match(buildGeminiPrompt("USER PROMPT", "none", "pure-text"), /only headings, paragraphs, links, lists, and tables/);
+});
+
+test("unsupported layout settings are rejected", () => {
+	assert.throws(() => normalizeLayout("magazine"), /Unsupported layout setting/);
+});
 
 test("side panel color vision select exposes the exact supported values", async () => {
 	const html = await readFile(sidepanelPath, "utf8");
