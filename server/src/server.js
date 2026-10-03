@@ -8,6 +8,7 @@ import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { extractReadableContent } from "./html-content.js";
 
 const app = express();
 app.use(cors({
@@ -30,6 +31,7 @@ const host = process.env.HOST ?? "127.0.0.1";
 const port = Number(process.env.PORT ?? 5000);
 
 const gemini_prompt = "You're given an HTML page and a user's request to update that page. Return ONLY the complete updated HTML source of the page, with no Markdown code fence and no explanation. Preserve the page's original meaning unless the user asks for a change. If the user asks for accessibility improvements, fix color contrast, add alt text to images, use semantic HTML, and ensure interactive elements are keyboard accessible.";
+const summarize_prompt = "Summarize the supplied webpage content using accessible, accurate language. Preserve important facts, names, numbers, relationships, and links. Use plain language and a clear structure that is easy to scan. Do not invent details, overstate claims, use filler, mention that you are an AI, or use typical generative-AI markers such as 'Here is a summary', 'delve', 'comprehensive', 'in conclusion', or decorative headings. Return only the summary, without Markdown fences or commentary about the task.";
 const models = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash"];
 
 const API_KEY = process.env.GEMINI;
@@ -40,19 +42,7 @@ app.get("/", (_request, response) => {
 
 app.use(express.json({ limit: "5mb" }));
 
-app.post("/ask-gemini", async (request, response) => {
-	const prompt = request.body.prompt;
-
-	if (!API_KEY) {
-		response.json({ ok: false, error: "Missing GEMINI in server/.env." });
-		return;
-	}
-
-	if (!prompt) {
-		response.json({ ok: false, error: "Missing prompt." });
-		return;
-	}
-
+async function generateGeminiText(prompt) {
 	let lastError = "Gemini returned no response.";
 
 	for (const model of models) {
@@ -67,11 +57,7 @@ app.post("/ask-gemini", async (request, response) => {
 				body: JSON.stringify({
 					contents: [
 						{
-							parts: [
-								{
-									text: `${gemini_prompt}\n\n${prompt}`
-								}
-							]
+							parts: [{ text: prompt }]
 						}
 					]
 				})
@@ -86,24 +72,56 @@ app.post("/ask-gemini", async (request, response) => {
 			continue;
 		}
 
-		const text = data.candidates?.[0]?.content?.parts?.[0]?.text
-			?.replace(/^```html\s*/i, "")
-			?.replace(/^```\s*/i, "")
-			?.replace(/```$/i, "")
-			?.trim();
+		const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+		if (text) return text;
 
-		if (text) {
-			response.json({ ok: true, text });
-			return;
-		}
-
-		lastError = "Gemini response did not include HTML text.";
+		lastError = "Gemini response did not include text.";
 	}
 
-	response.json({
-		ok: false,
-		error: lastError
-	});
+	throw new Error(lastError);
+}
+
+app.post("/ask-gemini", async (request, response) => {
+	const prompt = request.body.prompt;
+
+	if (!API_KEY) {
+		response.json({ ok: false, error: "Missing GEMINI in server/.env." });
+		return;
+	}
+
+	if (!prompt) {
+		response.json({ ok: false, error: "Missing prompt." });
+		return;
+	}
+
+	try {
+		const text = await generateGeminiText(`${gemini_prompt}\n\n${prompt}`);
+		response.json({ ok: true, text: text.replace(/^```html\s*/i, "").replace(/^```\s*/i, "").replace(/```$/i, "").trim() });
+	} catch (error) {
+		response.json({ ok: false, error: error.message });
+	}
+});
+
+app.post("/summarize", async (request, response) => {
+	if (!API_KEY) {
+		return response.status(500).json({ ok: false, error: "Missing GEMINI in server/.env." });
+	}
+
+	if (typeof request.body.html !== "string" || !request.body.html.trim()) {
+		return response.status(400).json({ ok: false, error: "Missing html." });
+	}
+
+	const content = extractReadableContent(request.body.html);
+	if (!content) {
+		return response.status(422).json({ ok: false, error: "HTML did not contain readable content." });
+	}
+
+	try {
+		const text = await generateGeminiText(`${summarize_prompt}\n\nWEBPAGE CONTENT:\n${content}`);
+		return response.json({ ok: true, text });
+	} catch (error) {
+		return response.status(502).json({ ok: false, error: error.message });
+	}
 });
 
 const upload = multer({
