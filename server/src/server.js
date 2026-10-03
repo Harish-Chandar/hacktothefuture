@@ -85,7 +85,7 @@ const LAYOUT_INSTRUCTIONS = {
 	]
 };
 
-const API_KEY = process.env.GEMINI;
+const API_KEY = process.env.PROD;
 
 app.get("/", (_request, response) => {
 	response.json({ status: "ok" });
