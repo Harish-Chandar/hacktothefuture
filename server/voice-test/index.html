@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Parakeet Voice Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+        }
+
+        button {
+            padding: 12px 20px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+<h1>Parakeet Voice Test</h1>
+
+<button id="record">Start recording</button>
+<p id="status">Ready</p>
+
+<textarea
+        id="transcript"
+        placeholder="Your transcription will appear here..."
+></textarea>
+
+<script>
+    const button = document.getElementById("record");
+    const status = document.getElementById("status");
+    const transcript = document.getElementById("transcript");
+
+    let recorder;
+    let stream;
+    let chunks = [];
+
+    button.onclick = async () => {
+        if (recorder?.state === "recording") {
+            recorder.stop();
+            button.disabled = true;
+            status.textContent = "Processing...";
+            return;
+        }
+
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                audio: true
+            });
+
+            chunks = [];
+            recorder = new MediaRecorder(stream);
+
+            recorder.ondataavailable = event => {
+                if (event.data.size > 0) {
+                    chunks.push(event.data);
+                }
+            };
+
+            recorder.onstop = async () => {
+                stream.getTracks().forEach(track => track.stop());
+
+                const audio = new Blob(chunks, {
+                    type: recorder.mimeType
+                });
+
+                const form = new FormData();
+                form.append("audio", audio, "recording.webm");
+
+                status.textContent = "Transcribing...";
+
+                try {
+                    const response = await fetch(
+                        "http://127.0.0.1:5000/transcribe",
+                        {
+                            method: "POST",
+                            body: form
+                        }
+                    );
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.error || "Transcription failed");
+                    }
+
+                    transcript.value = result.text;
+                    status.textContent = "Done!";
+
+                } catch (error) {
+                    status.textContent = error.message;
+                } finally {
+                    button.disabled = false;
+                    button.textContent = "Start recording";
+                }
+            };
+
+            recorder.start();
+            button.textContent = "Stop recording";
+            status.textContent = "Listening...";
+
+        } catch (error) {
+            status.textContent = error.message;
+            button.disabled = false;
+        }
+    };
+</script>
+</body>
+</html>
