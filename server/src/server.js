@@ -4,12 +4,20 @@ import cors from "cors";
 
 const app = express();
 app.use(cors({
-	origin: "chrome-extension://niiogjnifajgifkhicfifjfabmconbfk"
+	origin(origin, callback) {
+		if (!origin || origin.startsWith("chrome-extension://")) {
+			callback(null, true);
+			return;
+		}
+
+		callback(new Error("Origin not allowed by CORS"));
+	}
 }));
 const host = process.env.HOST ?? "127.0.0.1";
 const port = Number(process.env.PORT ?? 5000);
 
-const gemini_prompt = "You're given an HTML page and a user's request to make the page more accessible. You should return *ONLY* the new HTML source of the page, with no other text or explanation. Fix color contrasts, add alt text to images, and ensure that all interactive elements are keyboard acecssible. If the user requests, reformat the HTML to be more semantic, accessible, and 'standard'."
+const gemini_prompt = "You're given an HTML page and a user's request to update that page. Return ONLY the complete updated HTML source of the page, with no Markdown code fence and no explanation. Preserve the page's original meaning unless the user asks for a change. If the user asks for accessibility improvements, fix color contrast, add alt text to images, use semantic HTML, and ensure interactive elements are keyboard accessible.";
+const models = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash"];
 
 const API_KEY = process.env.GEMINI;
 
@@ -21,40 +29,81 @@ app.get("/", (_request, response) => {
 
 
 
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
 
 app.post("/ask-gemini", async (request, response) => {
 	const prompt = request.body.prompt;
 
-	const geminiResponse = await fetch(
-		"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
-		{
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				"x-goog-api-key": API_KEY
-			},
-			body: JSON.stringify({
-				contents: [
-					{
-						parts: [
-							{
-								text: prompt
-							}
-						]
-					}
-				]
-			})
+	if (!API_KEY) {
+		response.json({ ok: false, error: "Missing GEMINI in server/.env." });
+		return;
+	}
+
+	if (!prompt) {
+		response.json({ ok: false, error: "Missing prompt." });
+		return;
+	}
+
+	let lastError = "Gemini returned no response.";
+
+	for (const model of models) {
+		const geminiResponse = await fetch(
+			`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"x-goog-api-key": API_KEY
+				},
+				body: JSON.stringify({
+					contents: [
+						{
+							parts: [
+								{
+									text: `${gemini_prompt}\n\n${prompt}`
+								}
+							]
+						}
+					]
+				})
+			}
+		);
+
+		const data = await geminiResponse.json();
+		console.log(JSON.stringify({ model, status: geminiResponse.status, data }, null, 2));
+
+		if (!geminiResponse.ok) {
+			lastError = data.error?.message ?? `Gemini returned HTTP ${geminiResponse.status}.`;
+			continue;
 		}
-	);
 
-	const data = await geminiResponse.json();
-	console.log(JSON.stringify(data, null, 2));
-	const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "No response";
+		const text = data.candidates?.[0]?.content?.parts?.[0]?.text
+			?.replace(/^```html\s*/i, "")
+			?.replace(/^```\s*/i, "")
+			?.replace(/```$/i, "")
+			?.trim();
 
-	response.json({ text });
+		if (text) {
+			response.json({ ok: true, text });
+			return;
+		}
+
+		lastError = "Gemini response did not include HTML text.";
+	}
+
+	response.json({
+		ok: false,
+		error: lastError
+	});
 });
 
+app.use((error, _request, response, _next) => {
+	console.error(error);
+	response.json({
+		ok: false,
+		error: error.message ?? "Server error."
+	});
+});
 
 app.listen(port, host, () => {
 	console.log(`API listening at http://${host}:${port}`);
