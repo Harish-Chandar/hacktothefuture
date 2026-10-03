@@ -29,12 +29,12 @@ Start the server first (`cd server && npm install && npm start`, with `GEMINI` s
 The extension uses the server's existing endpoint, `POST {serverUrl}/ask-gemini` (default `http://127.0.0.1:5000/ask-gemini`):
 
 - Request: `{ "prompt": "<instructions + user's needs + page HTML>" }`. The full prompt is built in `prompt.js`.
-- Response: `{ "text": "<Gemini's reply>" }`. The extension pulls the HTML document out of `text`, even if Gemini wrapped it in a code fence.
-- Errors: any non-2xx status with `{ "error": "message" }` shows that message in the panel.
+- Response: `{ "ok": true, "text": "<Gemini's reply>" }`. The extension pulls the HTML document out of `text`, even if Gemini wrapped it in a code fence.
+- Errors: `{ "ok": false, "error": "message" }` (or any non-2xx status) shows that message in the panel.
 
 Server-side notes:
 
-- **Raise the body limit.** Whole pages are usually bigger than Express's default 100 KB, which causes a 413 error. Use `app.use(express.json({ limit: "10mb" }))`.
+- The server's JSON body limit (currently 5 MB) must fit the whole page's HTML.
 - CORS doesn't matter for the extension. It has host permissions, so the server's `cors()` origin setting doesn't block it (and unpacked extensions get a different ID on each computer anyway).
 - The extension waits up to 2 minutes for a response.
 - The extension strips `<script>` tags, inline `on*` handlers, and `javascript:` URLs from the result before showing it, so the model can't run code on the user's page.

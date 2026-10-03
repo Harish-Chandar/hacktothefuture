@@ -83,7 +83,10 @@ async function requestReformat(serverUrl, page) {
 
 	if (response.status === 413) throw new Error("This page is too big for the server to accept.");
 	const data = await response.json().catch(() => null);
-	if (!response.ok) throw new Error(data?.error || `The server returned an error (${response.status}).`);
+	// The server reports failures as { ok: false, error } (usually with status 200).
+	if (!response.ok || data?.ok === false) {
+		throw new Error(data?.error || `The server returned an error (${response.status}).`);
+	}
 
 	const html = typeof data?.text === "string" ? extractHtml(data.text) : null;
 	if (!html) throw new Error("The AI didn't send back a web page. Please try again.");
