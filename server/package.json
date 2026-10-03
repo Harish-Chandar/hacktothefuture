@@ -1,0 +1,14 @@
+{
+  "name": "hack-to-the-future-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Server scaffold for the Hack to the Future extension",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
