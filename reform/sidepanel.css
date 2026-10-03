@@ -491,7 +491,7 @@ button.secondary.post-action {
 	left: 0;
 	width: 58px;
 	height: 58px;
-	background: url("transparenticon.png") center / contain no-repeat;
+	background: url("transparentIcon.png") center / contain no-repeat;
 	filter: drop-shadow(0 3px 0 rgb(55 118 53 / 0.36));
 	animation: bunny-hop 7s ease-in-out infinite;
 }
