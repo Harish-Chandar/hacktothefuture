@@ -60,12 +60,13 @@ async function generateGeminiText(prompt) {
 							parts: [{ text: prompt }]
 						}
 					]
-				})
+				}),
+				signal: AbortSignal.timeout(90000)
 			}
 		);
 
 		const data = await geminiResponse.json();
-		console.log(JSON.stringify({ model, status: geminiResponse.status, data }, null, 2));
+		console.log(JSON.stringify({ model, status: geminiResponse.status }));
 
 		if (!geminiResponse.ok) {
 			lastError = data.error?.message ?? `Gemini returned HTTP ${geminiResponse.status}.`;

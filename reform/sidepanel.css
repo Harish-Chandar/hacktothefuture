@@ -321,6 +321,48 @@ button.secondary {
 	color: var(--accent);
 }
 
+button.secondary.post-action {
+	margin-top: 8px;
+}
+
+button:disabled {
+	cursor: progress;
+	opacity: 0.55;
+}
+
+.summary-field {
+	margin-top: 14px;
+}
+
+.summary-field label {
+	display: block;
+	margin-bottom: 6px;
+	font-weight: 700;
+}
+
+.summary-field textarea {
+	min-height: 120px;
+	resize: vertical;
+}
+
+.api-error {
+	position: sticky;
+	bottom: 10px;
+	z-index: 2;
+	margin-top: 12px;
+	padding: 10px 12px;
+	border: 1px solid var(--danger);
+	border-radius: 8px;
+	background: var(--danger-soft);
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+	color: var(--danger);
+	font-weight: 600;
+}
+
+.api-error::before {
+	content: "⚠ ";
+}
+
 .form-error {
 	margin-top: 10px;
 	color: var(--danger);

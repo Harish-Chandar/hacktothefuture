@@ -34,6 +34,7 @@ async function runJob({ tabId, requirements, other, output }) {
 		await update({ state: "working", message: "Asking the AI to reformat the page…" });
 		const result = await requestReformat({ ...page, requirements, other });
 
+		await update({ state: "working", message: "Applying the reformatted page…" });
 		if (output === "new-tab") {
 			const viewId = await saveView({ url: page.url, title: page.title, html: result.html, changes: result.changes });
 			const tab = await chrome.tabs.get(tabId);

@@ -1,7 +1,8 @@
 import { REQUIREMENTS, DEFAULT_MIN_TEXT_SIZE, buildRequirements } from "./requirements.js";
 import { getPrefs, savePrefs, getJob, clearJob, onJobChange } from "./storage.js";
-import { isReformatted, restoreOriginalPage } from "./page-scripts.js";
+import { capturePage, isReformatted, restoreOriginalPage } from "./page-scripts.js";
 import { isRecording, startRecording, stopAndTranscribe } from "./voice.js";
+import { SERVER_URL } from "./config.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -10,6 +11,7 @@ const form = $("reform-form");
 // The side panel stays open while the user switches tabs, so it always works
 // on whichever tab is currently active in its window.
 let tab;
+let pendingPostAction = false;
 
 init();
 
@@ -28,6 +30,7 @@ async function init() {
 	onJobChange((tabId, job) => {
 		if (tabId !== tab?.id) return;
 		renderJob(job);
+		if (job?.state === "error") showApiError(job.message);
 		refreshRestoreButton();
 	});
 
@@ -40,15 +43,13 @@ async function loadActiveTab() {
 
 	form.hidden = !supported;
 	$("unsupported").hidden = supported;
-	$("site").hidden = !supported;
 	if (!supported) {
 		renderJob(null);
+		setPostPending(false);
 		$("restore").hidden = true;
 		return;
 	}
 
-	const host = Object.assign(document.createElement("strong"), { textContent: new URL(tab.url).hostname });
-	$("site").replaceChildren("Reformatting ", host);
 	renderJob(await getJob(tab.id));
 	refreshRestoreButton();
 }
@@ -94,7 +95,10 @@ function renderJob(job) {
 	delete status.dataset.state;
 	submit.disabled = false;
 	submit.textContent = "Reformat page";
-	if (!job) return;
+	if (!job) {
+		setPostPending(false);
+		return;
+	}
 
 	status.dataset.state = job.state;
 	const line = document.createElement("p");
@@ -105,9 +109,9 @@ function renderJob(job) {
 		spinner.className = "spinner";
 		spinner.setAttribute("aria-hidden", "true");
 		line.append(spinner);
-		submit.disabled = true;
-		submit.textContent = "Working…";
+		setPostPending("reformat");
 	} else {
+		setPostPending(false);
 		line.append(job.state === "done" ? "✓ " : "⚠ ");
 	}
 	line.append(job.message);
@@ -173,6 +177,7 @@ function wireEvents() {
 		savePrefs(readPrefs());
 	});
 	form.addEventListener("submit", onSubmit);
+	$("summarize").addEventListener("click", onSummarize);
 	$("restore").addEventListener("click", onRestore);
 	$("mic").addEventListener("click", onMicClick);
 }
@@ -230,6 +235,7 @@ function setMicState(state, message) {
 
 async function onSubmit(event) {
 	event.preventDefault();
+	hideApiError();
 	const prefs = readPrefs();
 	if (!prefs.selected.length && !prefs.other.trim()) {
 		showFormError("Pick at least one option, or tell the AI what you need.");
@@ -243,6 +249,77 @@ async function onSubmit(event) {
 		other: prefs.other.trim(),
 		output: prefs.output,
 	});
+}
+
+async function onSummarize() {
+	if (!tab?.id || pendingPostAction) return;
+
+	hideApiError();
+	setPostPending("summarize");
+	$("summary").value = "";
+	$("summary-field").hidden = true;
+
+	try {
+		const page = await runInTab(capturePage);
+		const response = await fetch(`${SERVER_URL}/summarize`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ html: page.html }),
+			signal: AbortSignal.timeout(120000),
+		});
+		const data = await response.json().catch(() => null);
+
+		if (!response.ok || data?.ok === false) {
+			throw new Error(apiErrorMessage(data, response.status));
+		}
+		if (typeof data?.text !== "string" || !data.text.trim()) {
+			throw new Error("The server returned an empty summary.");
+		}
+		$("summary").value = data.text.trim();
+		$("summary-field").hidden = false;
+	} catch (error) {
+		showApiError(error.message || "Unable to summarize this page.");
+	} finally {
+		setPostPending(false);
+	}
+}
+
+function setPostPending(action) {
+	pendingPostAction = Boolean(action);
+	for (const button of document.querySelectorAll(".post-action, #mic")) button.disabled = Boolean(action);
+
+	const submit = $("submit");
+	const summarize = $("summarize");
+	submit.replaceChildren();
+	summarize.replaceChildren();
+	if (action === "reformat") {
+		const spinner = document.createElement("span");
+		spinner.className = "spinner";
+		spinner.setAttribute("aria-hidden", "true");
+		submit.append(spinner, " Working…");
+	} else if (action === "summarize") {
+		const spinner = document.createElement("span");
+		spinner.className = "spinner";
+		spinner.setAttribute("aria-hidden", "true");
+		summarize.append(spinner, " Summarizing…");
+	} else {
+		submit.textContent = "Reformat page";
+		summarize.textContent = "Summarize page";
+	}
+}
+
+function apiErrorMessage(data, status) {
+	return data?.message || data?.error || data?.data?.error?.message || `The server returned an error (${status}).`;
+}
+
+function showApiError(message) {
+	const error = $("api-error");
+	error.textContent = message;
+	error.hidden = false;
+}
+
+function hideApiError() {
+	$("api-error").hidden = true;
 }
 
 async function onRestore() {
