@@ -309,7 +309,31 @@ function openSummary() {
 	$("status").hidden = true;
 	$("restore").hidden = true;
 	$("summary-title").textContent = summary.title || "Page summary";
-	$("summary-content").textContent = summary.text;
+	renderSummaryContent(summary.text);
+}
+
+function renderSummaryContent(text) {
+	const content = $("summary-content");
+	const fragment = document.createDocumentFragment();
+	const urlPattern = /https?:\/\/[^\s)]+/gi;
+	let lastIndex = 0;
+
+	for (const match of text.matchAll(urlPattern)) {
+		const url = match[0].replace(/[.,;:!?]+$/, "");
+		const start = match.index;
+		fragment.append(text.slice(lastIndex, start));
+
+		const link = document.createElement("a");
+		link.href = url;
+		link.target = "_blank";
+		link.rel = "noopener noreferrer";
+		link.textContent = url;
+		fragment.append(link, match[0].slice(url.length));
+		lastIndex = start + match[0].length;
+	}
+
+	fragment.append(text.slice(lastIndex));
+	content.replaceChildren(fragment);
 }
 
 function showReformPane() {
