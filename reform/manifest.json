@@ -1,6 +1,6 @@
 {
-    "name": "Hello Extensions",
-    "description": "Base Level Extension",
+    "name": "Reform",
+    "description": "Reformat Websites",
     "version": "1.0",
     "manifest_version": 3,
     "action": {
