@@ -24,7 +24,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
 });
 chrome.tabs.onRemoved.addListener((tabId) => clearJob(tabId));
 
-async function runJob({ tabId, requirements, other, output }) {
+async function runJob({ tabId, requirements, colorVision, other, output }) {
 	const jobId = crypto.randomUUID();
 	const update = (fields) => setJob(tabId, { jobId, output, ...fields });
 
@@ -32,7 +32,7 @@ async function runJob({ tabId, requirements, other, output }) {
 		await update({ state: "working", message: "Reading the page…" });
 		const page = await runInTab(tabId, capturePage);
 		await update({ state: "working", message: "Asking the AI to reformat the page…" });
-		const result = await requestReformat({ ...page, requirements, other });
+		const result = await requestReformat({ ...page, requirements, colorVision, other });
 
 		await update({ state: "working", message: "Applying the reformatted page…" });
 		if (output === "new-tab") {
@@ -58,7 +58,7 @@ async function runInTab(tabId, func, args = []) {
 	return injection.result;
 }
 
-// Uses the server's POST /ask-gemini endpoint: { prompt } -> { text }.
+// Uses the server's POST /ask-gemini endpoint: { prompt, colorVision } -> { text }.
 async function requestReformat(page) {
 	const endpoint = `${SERVER_URL}/ask-gemini`;
 	let response;
@@ -66,7 +66,7 @@ async function requestReformat(page) {
 		response = await fetch(endpoint, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ prompt: buildPrompt(page) }),
+			body: JSON.stringify({ prompt: buildPrompt(page), colorVision: page.colorVision ?? "none" }),
 			signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
 		});
 	} catch (error) {
@@ -85,6 +85,7 @@ async function requestReformat(page) {
 	if (!html) throw new Error("The AI didn't send back a web page. Please try again.");
 
 	const changes = page.requirements.map((requirement) => requirement.label);
+	if (page.colorVision && page.colorVision !== "none") changes.push("Color vision support");
 	if (page.other) changes.push(`Your request: "${page.other}"`);
 	return { html, changes };
 }

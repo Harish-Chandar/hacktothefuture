@@ -183,8 +183,13 @@ legend,
 	margin-top: 14px;
 }
 
+.compact-field {
+	margin-top: 8px;
+}
+
 input[type="number"],
 input[type="url"],
+select,
 textarea {
 	width: 100%;
 	min-height: 34px;

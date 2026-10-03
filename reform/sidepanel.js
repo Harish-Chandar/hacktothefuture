@@ -7,6 +7,7 @@ import { SERVER_URL } from "./config.js";
 const $ = (id) => document.getElementById(id);
 
 const form = $("reform-form");
+const COLOR_VISION_VALUES = ["none", "protan", "deutan", "tritan", "achromatopsia"];
 
 // The side panel stays open while the user switches tabs, so it always works
 // on whichever tab is currently active in its window.
@@ -153,6 +154,7 @@ function readPrefs() {
 		other: $("other").value,
 		output: form.elements.output.value || "in-place",
 		minTextSize: Number.isFinite(size) && size >= 12 && size <= 40 ? size : DEFAULT_MIN_TEXT_SIZE,
+		colorVision: $("color-vision").value || "none",
 	};
 }
 
@@ -162,6 +164,7 @@ function applyPrefs(prefs) {
 	}
 	$("other").value = prefs.other;
 	$("min-text-size").value = prefs.minTextSize;
+	$("color-vision").value = COLOR_VISION_VALUES.includes(prefs.colorVision) ? prefs.colorVision : "none";
 	form.elements.output.value = prefs.output;
 	syncMinSizeRow();
 }
@@ -244,7 +247,7 @@ async function onSubmit(event) {
 	event.preventDefault();
 	hideApiError();
 	const prefs = readPrefs();
-	if (!prefs.selected.length && !prefs.other.trim()) {
+	if (!prefs.selected.length && !prefs.other.trim() && prefs.colorVision === "none") {
 		showFormError("Pick at least one option, or tell the AI what you need.");
 		return;
 	}
@@ -253,6 +256,7 @@ async function onSubmit(event) {
 		type: "reformat",
 		tabId: tab.id,
 		requirements: buildRequirements(prefs.selected, { minTextSize: prefs.minTextSize }),
+		colorVision: prefs.colorVision,
 		other: prefs.other.trim(),
 		output: prefs.output,
 	});
