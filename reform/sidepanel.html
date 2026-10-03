@@ -44,11 +44,14 @@
         <p id="form-error" class="form-error" role="alert" hidden></p>
         <button type="submit" id="submit" class="primary post-action">Reformat page</button>
         <button type="button" id="summarize" class="secondary post-action">Summarize page</button>
-        <div id="summary-field" class="summary-field" hidden>
-            <label for="summary">Summary</label>
-            <textarea id="summary" rows="8" readonly></textarea>
-        </div>
     </form>
+
+    <section id="summary-pane" class="summary-pane" aria-labelledby="summary-title" hidden>
+        <button type="button" id="summary-back" class="back-button">Back to reformat</button>
+        <p class="summary-kicker">Accessible page summary</p>
+        <h2 id="summary-title"></h2>
+        <div id="summary-content" class="summary-content"></div>
+    </section>
 
     <div id="status" class="status" role="status" aria-live="polite"></div>
     <button type="button" id="restore" class="secondary" hidden>Restore original page</button>

@@ -60,6 +60,16 @@ export async function getView(id) {
 	return (await chrome.storage.local.get(key))[key];
 }
 
+const summaryKey = (tabId) => `summary:${tabId}`;
+
+export async function saveSummary(tabId, summary) {
+	await chrome.storage.local.set({ [summaryKey(tabId)]: summary });
+}
+
+export async function getSummary(tabId) {
+	return (await chrome.storage.local.get(summaryKey(tabId)))[summaryKey(tabId)];
+}
+
 // Reformatted pages can be large, so only keep the most recent few.
 async function pruneViews() {
 	const everything = await chrome.storage.local.get(null);

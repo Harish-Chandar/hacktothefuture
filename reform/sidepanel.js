@@ -1,5 +1,5 @@
 import { REQUIREMENTS, DEFAULT_MIN_TEXT_SIZE, buildRequirements } from "./requirements.js";
-import { getPrefs, savePrefs, getJob, clearJob, onJobChange } from "./storage.js";
+import { getPrefs, savePrefs, getJob, clearJob, onJobChange, getSummary, saveSummary } from "./storage.js";
 import { capturePage, isReformatted, restoreOriginalPage } from "./page-scripts.js";
 import { isRecording, startRecording, stopAndTranscribe } from "./voice.js";
 import { SERVER_URL } from "./config.js";
@@ -12,6 +12,7 @@ const form = $("reform-form");
 // on whichever tab is currently active in its window.
 let tab;
 let pendingPostAction = false;
+let summary;
 
 init();
 
@@ -43,14 +44,19 @@ async function loadActiveTab() {
 
 	form.hidden = !supported;
 	$("unsupported").hidden = supported;
+	showReformPane();
 	if (!supported) {
 		renderJob(null);
 		setPostPending(false);
+		renderSummaryButton(null);
 		$("restore").hidden = true;
 		return;
 	}
 
 	renderJob(await getJob(tab.id));
+	summary = await getSummary(tab.id);
+	if (summary?.url !== tab.url) summary = null;
+	renderSummaryButton(summary);
 	refreshRestoreButton();
 }
 
@@ -178,6 +184,7 @@ function wireEvents() {
 	});
 	form.addEventListener("submit", onSubmit);
 	$("summarize").addEventListener("click", onSummarize);
+	$("summary-back").addEventListener("click", showReformPane);
 	$("restore").addEventListener("click", onRestore);
 	$("mic").addEventListener("click", onMicClick);
 }
@@ -253,11 +260,13 @@ async function onSubmit(event) {
 
 async function onSummarize() {
 	if (!tab?.id || pendingPostAction) return;
+	if (summary) {
+		openSummary();
+		return;
+	}
 
 	hideApiError();
 	setPostPending("summarize");
-	$("summary").value = "";
-	$("summary-field").hidden = true;
 
 	try {
 		const page = await runInTab(capturePage);
@@ -275,13 +284,39 @@ async function onSummarize() {
 		if (typeof data?.text !== "string" || !data.text.trim()) {
 			throw new Error("The server returned an empty summary.");
 		}
-		$("summary").value = data.text.trim();
-		$("summary-field").hidden = false;
+		summary = {
+			url: tab.url,
+			title: tab.title || new URL(tab.url).hostname,
+			text: data.text.trim(),
+		};
+		await saveSummary(tab.id, summary);
 	} catch (error) {
 		showApiError(error.message || "Unable to summarize this page.");
 	} finally {
 		setPostPending(false);
+		renderSummaryButton(summary);
 	}
+}
+
+function renderSummaryButton(value) {
+	const summarize = $("summarize");
+	if (summarize && !pendingPostAction) summarize.textContent = value ? "Show summary" : "Summarize page";
+}
+
+function openSummary() {
+	form.hidden = true;
+	$("summary-pane").hidden = false;
+	$("status").hidden = true;
+	$("restore").hidden = true;
+	$("summary-title").textContent = summary.title || "Page summary";
+	$("summary-content").textContent = summary.text;
+}
+
+function showReformPane() {
+	form.hidden = !/^https?:/.test(tab?.url ?? "");
+	$("summary-pane").hidden = true;
+	$("status").hidden = false;
+	refreshRestoreButton();
 }
 
 function setPostPending(action) {
@@ -304,7 +339,7 @@ function setPostPending(action) {
 		summarize.append(spinner, " Summarizing…");
 	} else {
 		submit.textContent = "Reformat page";
-		summarize.textContent = "Summarize page";
+		renderSummaryButton(summary);
 	}
 }
 

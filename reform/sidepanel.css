@@ -330,19 +330,37 @@ button:disabled {
 	opacity: 0.55;
 }
 
-.summary-field {
+.summary-pane {
 	margin-top: 14px;
 }
 
-.summary-field label {
-	display: block;
-	margin-bottom: 6px;
+.back-button {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--accent);
+	font: inherit;
 	font-weight: 700;
+	cursor: pointer;
 }
 
-.summary-field textarea {
-	min-height: 120px;
-	resize: vertical;
+.summary-kicker {
+	margin-top: 24px;
+	color: var(--muted);
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.summary-pane h2 {
+	margin: 6px 0 18px;
+	font-size: 20px;
+	line-height: 1.2;
+}
+
+.summary-content {
+	white-space: pre-wrap;
 }
 
 .api-error {
