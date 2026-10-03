@@ -120,7 +120,7 @@ function renderJob(job) {
 		setPostPending("reformat");
 	} else {
 		setPostPending(false);
-		line.append(job.state === "done" ? "✓ " : "⚠ ");
+		line.append(job.state === "done" ? "Done: " : "Error: ");
 	}
 	line.append(job.message);
 	status.append(line);
@@ -242,6 +242,10 @@ function setMicState(state, message) {
 	mic.dataset.state = state;
 	mic.disabled = state === "busy";
 	mic.setAttribute("aria-pressed", String(state === "recording"));
+	mic.setAttribute(
+		"aria-label",
+		state === "recording" ? "Stop recording instructions" : state === "busy" ? "Transcribing instructions" : "Speak your instructions",
+	);
 	$("mic-label").textContent = state === "recording" ? "Stop" : state === "busy" ? "Working…" : "Speak";
 	$("mic-status").textContent = message;
 }
@@ -353,6 +357,7 @@ function showReformPane() {
 
 function setPostPending(action) {
 	pendingPostAction = Boolean(action);
+	form.setAttribute("aria-busy", String(Boolean(action)));
 	for (const button of document.querySelectorAll(".post-action, #mic")) button.disabled = Boolean(action);
 
 	const submit = $("submit");
