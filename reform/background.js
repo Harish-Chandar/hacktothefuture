@@ -14,8 +14,10 @@ chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(consol
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 	if (message?.type !== "reformat") return;
-	runJob(message);
-	sendResponse({ started: true });
+	runJob(message)
+		.then(() => sendResponse({ ok: true }))
+		.catch((error) => sendResponse({ ok: false, error: error?.message || String(error) }));
+	return true;
 });
 
 // A finished job no longer describes the page once the tab navigates or closes.
