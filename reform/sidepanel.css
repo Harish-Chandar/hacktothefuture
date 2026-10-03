@@ -200,6 +200,71 @@ textarea {
 	resize: vertical;
 }
 
+.field-head {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: 6px;
+}
+
+.field-head label {
+	font-weight: 700;
+}
+
+.mic {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	min-height: 30px;
+	padding: 4px 10px;
+	border: 1px solid var(--accent);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--accent);
+	font: inherit;
+	font-size: 13px;
+	font-weight: 600;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.mic[data-state="recording"] {
+	border-color: var(--danger);
+	background: var(--danger-soft);
+	color: var(--danger);
+}
+
+.mic[data-state="recording"]::before {
+	content: "";
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: currentColor;
+	animation: pulse 1s ease-in-out infinite;
+}
+
+.mic:disabled {
+	cursor: progress;
+	opacity: 0.65;
+}
+
+.mic-status:empty {
+	display: none;
+}
+
+.mic-status {
+	margin-top: 5px;
+	color: var(--muted);
+	font-size: 12.5px;
+}
+
+@keyframes pulse {
+	50% {
+		opacity: 0.3;
+	}
+}
+
 textarea::placeholder {
 	color: var(--muted);
 }

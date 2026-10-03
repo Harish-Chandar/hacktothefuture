@@ -1,6 +1,7 @@
 import { REQUIREMENTS, DEFAULT_MIN_TEXT_SIZE, buildRequirements } from "./requirements.js";
 import { getPrefs, savePrefs, getJob, clearJob, onJobChange } from "./storage.js";
 import { isReformatted, restoreOriginalPage } from "./page-scripts.js";
+import { isRecording, startRecording, stopAndTranscribe } from "./voice.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -173,6 +174,58 @@ function wireEvents() {
 	});
 	form.addEventListener("submit", onSubmit);
 	$("restore").addEventListener("click", onRestore);
+	$("mic").addEventListener("click", onMicClick);
+}
+
+async function onMicClick() {
+	if (!isRecording()) {
+		try {
+			await startRecording();
+		} catch (error) {
+			handleMicError(error);
+			return;
+		}
+		setMicState("recording", "Listening… click Stop when you're done.");
+		return;
+	}
+
+	setMicState("busy", "Transcribing…");
+	try {
+		const text = await stopAndTranscribe();
+		if (!text) {
+			setMicState("idle", "Didn't catch any words. Please try again.");
+			return;
+		}
+		const other = $("other");
+		other.value = other.value.trim() ? `${other.value.trim()} ${text}` : text;
+		hideFormError();
+		savePrefs(readPrefs());
+		setMicState("idle", "Added what you said to the box.");
+	} catch (error) {
+		setMicState("idle", `⚠ ${error.message}`);
+	}
+}
+
+// The side panel can't show the browser's permission prompt, so the first
+// time, ask from a regular tab instead.
+function handleMicError(error) {
+	if (error.name === "NotAllowedError") {
+		chrome.tabs.create({ url: chrome.runtime.getURL("mic-permission.html") });
+		setMicState("idle", "Allow the microphone in the tab that just opened, then click Speak again.");
+	} else if (error.name === "NotFoundError") {
+		setMicState("idle", "⚠ No microphone found.");
+	} else {
+		setMicState("idle", `⚠ Couldn't start recording: ${error.message}`);
+	}
+}
+
+function setMicState(state, message) {
+	const mic = $("mic");
+	mic.dataset.state = state;
+	mic.disabled = state === "busy";
+	mic.setAttribute("aria-pressed", String(state === "recording"));
+	$("mic-label").textContent = state === "recording" ? "Stop" : state === "busy" ? "Working…" : "Speak";
+	$("mic-status").textContent = message;
 }
 
 async function onSubmit(event) {

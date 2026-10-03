@@ -25,8 +25,15 @@
         </fieldset>
 
         <div class="field">
-            <label for="other">Tell the AI what else you need</label>
-            <textarea id="other" rows="3" placeholder="e.g. Make the menu buttons bigger and hide the sidebar"></textarea>
+            <div class="field-head">
+                <label for="other">Tell the AI what else you need</label>
+                <button type="button" id="mic" class="mic" aria-pressed="false">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.93V21h2v-2.07A7 7 0 0 0 19 12h-2Z"/></svg>
+                    <span id="mic-label">Speak</span>
+                </button>
+            </div>
+            <textarea id="other" rows="3" placeholder="Type, or click Speak and say what you need"></textarea>
+            <p id="mic-status" class="mic-status" role="status" aria-live="polite"></p>
         </div>
 
         <fieldset class="output">

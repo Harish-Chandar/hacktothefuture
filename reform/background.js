@@ -5,8 +5,7 @@
 import { capturePage, applyReformattedHtml } from "./page-scripts.js";
 import { buildPrompt, extractHtml } from "./prompt.js";
 import { setJob, clearJob, saveView } from "./storage.js";
-
-const SERVER_URL = "http://127.0.0.1:5000";
+import { SERVER_URL } from "./config.js";
 const REQUEST_TIMEOUT_MS = 120_000;
 
 // Clicking the toolbar icon opens the side panel, which squeezes the page
