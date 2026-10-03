@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1530" viewBox="0 0 1700 1530">
+<title>Cat Track full system architecture</title>
+<desc>Sources are converted into persistent events and searchable memories. Queries retrieve original evidence for grounded answers. Human outcomes update the same persistent history.</desc>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#526176"/></marker></defs><rect width="1700" height="1530" fill="#fff"/>
+<text x="55" y="58" font-family="Arial, sans-serif" font-size="34" fill="#18283d" font-weight="bold" text-anchor="start">Cat Track System Architecture</text>
+<text x="55" y="92" font-family="Arial, sans-serif" font-size="19" fill="#18283d" font-weight="normal" text-anchor="start">Persistent equipment memory • Evidence-backed reasoning • Human outcome feedback</text>
+<rect x="40" y="130" width="375" height="1185" rx="16" fill="#f2f6fa" stroke="#d6dfe8"/>
+<text x="60" y="165" font-family="Arial, sans-serif" font-size="18" fill="#18283d" font-weight="bold" text-anchor="start">INGESTION</text>
+<text x="60" y="191" font-family="Arial, sans-serif" font-size="15" fill="#58667a" font-weight="normal" text-anchor="start">Teammate B</text>
+<rect x="440" y="130" width="375" height="1185" rx="16" fill="#fff8e3" stroke="#d6dfe8"/>
+<text x="460" y="165" font-family="Arial, sans-serif" font-size="18" fill="#18283d" font-weight="bold" text-anchor="start">PERSISTENT MEMORY</text>
+<text x="460" y="191" font-family="Arial, sans-serif" font-size="15" fill="#58667a" font-weight="normal" text-anchor="start">Teammate B + C</text>
+<rect x="840" y="130" width="375" height="1185" rx="16" fill="#f0f6ff" stroke="#d6dfe8"/>
+<text x="860" y="165" font-family="Arial, sans-serif" font-size="18" fill="#18283d" font-weight="bold" text-anchor="start">RETRIEVAL AND REASONING</text>
+<text x="860" y="191" font-family="Arial, sans-serif" font-size="15" fill="#58667a" font-weight="normal" text-anchor="start">Teammate C</text>
+<rect x="1240" y="130" width="375" height="1185" rx="16" fill="#f0f8f3" stroke="#d6dfe8"/>
+<text x="1260" y="165" font-family="Arial, sans-serif" font-size="18" fill="#18283d" font-weight="bold" text-anchor="start">USER EXPERIENCE</text>
+<text x="1260" y="191" font-family="Arial, sans-serif" font-size="15" fill="#58667a" font-weight="normal" text-anchor="start">Teammate A</text>
+<rect x="60" y="225" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="227.5" y="253" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Source inputs</text>
+<text x="227.5" y="276" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Reports, logs, telemetry, context</text>
+<rect x="60" y="325" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="227.5" y="353" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Optional inputs</text>
+<text x="227.5" y="376" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Images and PDFs</text>
+<rect x="60" y="425" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="227.5" y="453" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Ingestion API</text>
+<text x="227.5" y="476" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Accept source + asset identity</text>
+<rect x="60" y="545" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="227.5" y="573" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Parse and detect episodes</text>
+<text x="227.5" y="596" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Files → text; samples → incidents</text>
+<rect x="60" y="665" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="227.5" y="693" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Extract structured events</text>
+<text x="227.5" y="716" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Model-assisted extraction</text>
+<rect x="60" y="785" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="227.5" y="813" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Validate and deduplicate</text>
+<text x="227.5" y="836" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">IDs, timestamps, units, source hashes</text>
+<rect x="60" y="965" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="227.5" y="993" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Link events and corrections</text>
+<text x="227.5" y="1016" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Incidents, repairs, outcomes</text>
+<rect x="460" y="425" width="335" height="76" rx="5" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="627.5" y="453" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Original evidence store</text>
+<text x="627.5" y="476" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Files, excerpts, raw measurements</text>
+<rect x="460" y="965" width="335" height="76" rx="5" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="627.5" y="993" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Canonical event database</text>
+<text x="627.5" y="1016" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Assets, events, relations, outcomes</text>
+<rect x="460" y="1085" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="627.5" y="1113" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Index memories</text>
+<text x="627.5" y="1136" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Create or refresh searchable records</text>
+<rect x="460" y="1205" width="335" height="76" rx="5" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="627.5" y="1233" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Memory search index</text>
+<text x="627.5" y="1256" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Mem0 or local retrieval</text>
+<rect x="860" y="225" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="1027.5" y="253" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Query API</text>
+<text x="1027.5" y="276" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Asset, role, question, query time</text>
+<rect x="860" y="345" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="1027.5" y="373" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Scope and retrieve</text>
+<text x="1027.5" y="396" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Asset + time filters; relevance ranking</text>
+<rect x="860" y="545" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="1027.5" y="573" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Fetch linked context</text>
+<text x="1027.5" y="596" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Events, repairs, outcomes, sources</text>
+<rect x="860" y="665" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="1027.5" y="693" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Resolve evolving knowledge</text>
+<text x="1027.5" y="716" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Corrections, applicability, uncertainty</text>
+<rect x="860" y="785" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="1027.5" y="813" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Generate grounded answer</text>
+<text x="1027.5" y="836" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Role-specific model response</text>
+<rect x="860" y="905" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="1027.5" y="933" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Validate supporting citations</text>
+<text x="1027.5" y="956" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Check source IDs; flag unsupported claims</text>
+<rect x="1260" y="225" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="1427.5" y="253" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Asset workspace</text>
+<text x="1427.5" y="276" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Operator, technician, fleet manager</text>
+<rect x="1260" y="425" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="1427.5" y="453" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Timeline and evidence viewer</text>
+<text x="1427.5" y="476" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Read events and original sources</text>
+<rect x="1260" y="905" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="1427.5" y="933" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Answer and evidence panel</text>
+<text x="1427.5" y="956" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Explanation, sources, uncertainties</text>
+<rect x="1260" y="1025" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="1427.5" y="1053" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Human review</text>
+<text x="1427.5" y="1076" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Record finding, action, and outcome</text>
+<rect x="1260" y="1145" width="335" height="76" rx="12" fill="white" stroke="#8191a4" stroke-width="1.4"/>
+<text x="1427.5" y="1173" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="middle">Outcome API</text>
+<text x="1427.5" y="1196" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="middle">Validate and link to incident</text>
+<path d="M 227,301 L 227,313 L 405,313 L 405,463 L 395,463" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 227.5,401 L 227.5,425" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 227.5,501 L 227.5,545" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 227.5,621 L 227.5,665" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 227.5,741 L 227.5,785" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 227.5,861 L 227.5,965" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 395,463.0 L 460,463.0" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 395,1003.0 L 460,1003.0" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 627.5,1041 L 627.5,1085" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 627.5,1161 L 627.5,1205" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 1260,263.0 L 1195,263.0" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 1027.5,301 L 1027.5,345" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 1027.5,421 L 1027.5,545" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 1027.5,621 L 1027.5,665" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 1027.5,741 L 1027.5,785" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 1027.5,861 L 1027.5,905" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 1195,943.0 L 1260,943.0" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 795,1243 L 820,1243 L 820,383 L 860,383" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 795,1003 L 808,1003 L 808,583 L 860,583" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 795,463 L 820,463 L 820,523 L 1027,523 L 1027,545" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 1427.5,301 L 1427.5,425" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 795,463 L 830,463 L 830,510 L 1220,510 L 1220,448 L 1260,448" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 627,965 L 627,525 L 1230,525 L 1230,480 L 1260,480" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 1427.5,981 L 1427.5,1025" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 1427.5,1101 L 1427.5,1145" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 1427,1221 L 1427,1339 L 425,1339 L 425,1058 L 227,1058 L 227,1041" fill="none" stroke="#526176" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="790" y="1332" font-family="Arial, sans-serif" font-size="16" fill="#18283d" font-weight="normal" text-anchor="middle">Validated outcomes feed back into event history and its search index</text>
+<text x="55" y="1393" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="bold" text-anchor="start">SOURCE OF TRUTH</text>
+<text x="55" y="1422" font-family="Arial, sans-serif" font-size="18" fill="#18283d" font-weight="normal" text-anchor="start">Canonical records and original evidence are retained. The search index retrieves their IDs; it does not replace them.</text>
+<text x="55" y="1460" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="start">Prototype: simulated telemetry + text/CSV ingestion. “Learning” means updated persistent history, not model retraining.</text>
+<text x="55" y="1493" font-family="Arial, sans-serif" font-size="17" fill="#18283d" font-weight="normal" text-anchor="start">You: own the scenario, dataset, verification, integration checkpoints, and demonstration.</text>
+</svg>
